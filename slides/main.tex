@@ -139,10 +139,10 @@ Unfortunately, Cryptographic Sortition has never been formalised...
 \frametitle{Basic idea of Algorand's Cryptographic Sortition}
 
 \begin{itemize}
-    \item For each user with $w$ coins, divide interval $[0, 1)$ to $w$ sub-intervals $\langle I^j \rangle$. For all $j \in [0, w]: I^j = \left[ \sum_{k=0}^j B(k;w,p), \sum_{k=0}^{j+1} B(k;w,p) \right)$.
-    \item $p = \frac{\tau}{W}$, where $\tau$ is a threshold parameter and $W$ is the total supply of coins.
-    \item Binomial distribution $B(k;w,p)$ is the probability of having $k$ successful tries in $w$ tries, each of which succeeds with probability $p$.
+    \item For each user with $w$ coins, divide interval $[0, 1)$ to $w$ sub-intervals $\langle I^j \rangle$.
     \item The user computes a VRF $hash$ of a $seed$, then find $I^j$ s.t. $\frac{hash}{2^{hashlen}} \in I^j$.
+    \item More stake, more likely to have a bigger $j$.
+    \item Given a cutoff $x$, nodes with $j > x$ will be selected to the committee.
 \end{itemize}
     
 \end{frame}
@@ -174,8 +174,6 @@ Unfortunately, Cryptographic Sortition has never been formalised...
 \frametitle{Rationales of Algorand's Cryptographic Sortition}
     
 \begin{itemize}
-    \item Given a cutoff, nodes with $j$ larger than it will be elected.
-    \item A poor user still has a chance if finding a very big VRF hash.
     \item With bigger $\tau$, $j$ is likely to be small.
     \item With bigger $w$, $j$ is likely to be big.
     \item Sybil-resistant by $B(k_1;n_1,p) + B(k_2;n_2,p) = B(k_1 + k_2;n_1 + n_2,p)$.
@@ -220,8 +218,7 @@ In stake-based Leader Election, the probability that each node is elected is wei
     \item $w, W$ is the user's stake and the total supply of coins, resp.
     \item $f$ is a difficulty parameter. $f \uparrow \Rightarrow P(\text{elected}) \uparrow$.
     \item $sl$ is \# of the time slot.
-    \item This CANNOT guarantee that only one user is elected.
-    \item Still require the longest chain rule.
+    \item CANNOT guarantee that only one user is elected.
     \item Sybil-resistant by $1 - \phi_f(\sum_i \alpha_i) = \prod_i(1 - \phi_f(\alpha_i))$.
 \end{itemize}
 
@@ -269,7 +266,7 @@ In stake-based Leader Election, the probability that each node is elected is wei
     
 \begin{itemize}
     \item The verification should not reveal the public key.
-    \item Achieved by having many public keys associated with a secret key.
+    \item A secret key is associated with many public keys.
     \item Two VRF hashes on the same secret key but different messages cannot be linked to a public key.
 \end{itemize}
 
@@ -282,6 +279,17 @@ In stake-based Leader Election, the probability that each node is elected is wei
 \end{frame}
 
 
+\begin{frame}
+\frametitle{An AVRF Construction}
+
+\begin{description}
+    \item[$\mathsf{Gen}(1^k) \to (pk, k)$]: Choose a generator $g$ of $G$; choose a random secret key $k \stackrel{\$}{\gets} \mathbb{Z}_q$; output $pk = (g, g^k)$, $k$.
+    \item[$\mathsf{Update}(pk) \to pk'$]: Let $pk$ be $g, v$; choose a random $r \stackrel{\$}{\gets} \mathbb{Z}_q$; $g' = g^r$, $v' = v^r$; output $pk' = (g', v')$.
+    \item[$\mathsf{VRFprove}_k(pk', x) \to (pk', y, \pi)$]: Let $pk'$ be $g, v$; $u = H(x), y = u^k$; $\pi' = NIZK: \{k: log_uy = log_gv\}$; $pi = (u, \pi')$; output $pk', y, \pi$.
+    \item[$\mathsf{VRFVerify}_{pk'}(x, y, \pi) \to \{0, 1\}$]: Output 1 if $u = H(x)$ and $\pi$ verifies; otherwise 0.
+\end{description}
+
+\end{frame}
 
 
 \begin{frame}
