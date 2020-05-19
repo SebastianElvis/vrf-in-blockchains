@@ -90,7 +90,7 @@ Taxonomy from Ganesh et al.~\cite{ganesh2019proof}.
 
 
 \begin{frame}
-\frametitle{Key Components using VRFs in PoW-based Consensus}
+\frametitle{Key Components using VRFs in PoS-based Consensus}
 
 \begin{figure}
     \begin{subfigure}{.45\textwidth}
@@ -139,7 +139,7 @@ Unfortunately, Cryptographic Sortition has never been formalised...
 \frametitle{Basic idea of Algorand's Cryptographic Sortition}
 
 \begin{itemize}
-    \item For each user with $w$ coins, divide interval $[0, 1)$ to $w$ sub-intervals $\langle I^j \rangle$.
+    \item For each user with $w$ coins, divide interval $[0, 1)$ to $w$ sub-intervals $\langle I^1, I^2, \dots, I^w \rangle$.
     \item The user computes a VRF $hash$ of a $seed$, then find $I^j$ s.t. $\frac{hash}{2^{hashlen}} \in I^j$.
     \item More stake, more likely to have a bigger $j$.
     \item Given a cutoff $x$, nodes with $j > x$ will be selected to the committee.
@@ -153,7 +153,7 @@ Unfortunately, Cryptographic Sortition has never been formalised...
 \begin{itemize}
     \item $sk, w$ is the user's secret key and stake.
     \item $\tau$ is a threshold parameter. $W$ is the total supply of coins. $seed$ is a random number.
-    \item $B(k; w, p) = {w \choose k} p^k (1-p)^{w-k}$, $\sum_{k=0}^w B(k; w, p) = 1$.
+    \item $B(k; w, p) = {w \choose k} p^k (1-p)^{w-k}$.
 \end{itemize}
 
 \begin{algorithm}[H]
@@ -174,8 +174,8 @@ Unfortunately, Cryptographic Sortition has never been formalised...
 \frametitle{Rationales of Algorand's Cryptographic Sortition}
     
 \begin{itemize}
-    \item With bigger $\tau$, $j$ is likely to be small.
-    \item With bigger $w$, $j$ is likely to be big.
+    \item With bigger threshold parameter $\tau$, $j$ is likely to be small.
+    \item With bigger stake $w$, $j$ is likely to be big.
     \item Sybil-resistant by $B(k_1;n_1,p) + B(k_2;n_2,p) = B(k_1 + k_2;n_1 + n_2,p)$.
     \item Acheives Privacy as VRF requires $sk$ to compute.
 \end{itemize}
@@ -255,19 +255,18 @@ In stake-based Leader Election, the probability that each node is elected is wei
 
 \begin{itemize}
     \item PPoS is introduced in two concurrent papers: Ouroboros Crypsinous~\cite{kerber2019ouroboros} and Ganesh et al.~\cite{ganesh2019proof}.
-    \item Ganesh et al.~\cite{ganesh2019proof} construct PPoS from Anonymous Verifiable Random Functions (AVRF).
+    \item Ganesh et al.~\cite{ganesh2019proof} construct PPoS from Anonymous Verifiable Random Function (AVRF).
 \end{itemize}
 
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Anonymous Verifiable Random Functions (AVRF)}
+\frametitle{Anonymous Verifiable Random Function (AVRF)}
     
 \begin{itemize}
-    \item The verification should not reveal the public key.
-    \item A secret key is associated with many public keys.
-    \item Two VRF hashes on the same secret key but different messages cannot be linked to a public key.
+    \item Verification should not reveal the public key.
+    \item Given two VRF hashes using different secret keys and the same input, any adversary cannot distinguish whether they are generated using the same secret key or different ones.
 \end{itemize}
 
 \begin{figure}
@@ -282,6 +281,14 @@ In stake-based Leader Election, the probability that each node is elected is wei
 \begin{frame}
 \frametitle{An AVRF Construction}
 
+Rationale:
+\begin{itemize}
+    \item A SK is associated with many (temporary) PKs.
+    \item Each PK can only be used for hashing a single input, otherwise two hashes can be linked to this PK.
+    \item Given SK, two hashes on the same input can be linked.
+\end{itemize}
+
+Construction:
 \begin{description}
     \item[$\mathsf{Gen}(1^k) \to (pk, k)$]: Choose a generator $g$ of $G$; choose a random secret key $k \stackrel{\$}{\gets} \mathbb{Z}_q$; output $pk = (g, g^k)$, $k$.
     \item[$\mathsf{Update}(pk) \to pk'$]: Let $pk$ be $g, v$; choose a random $r \stackrel{\$}{\gets} \mathbb{Z}_q$; $g' = g^r$, $v' = v^r$; output $pk' = (g', v')$.
